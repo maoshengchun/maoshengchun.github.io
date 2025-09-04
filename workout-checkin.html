@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>锻炼打卡小程序</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        accent: '#F59E0B',
+                        light: '#F3F4F6',
+                        dark: '#1F2937'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            }
+            .btn-hover {
+                @apply transition-all duration-300 hover:shadow-lg transform hover:-translate-y-0.5;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-sans text-dark">
+    <!-- 顶部导航 -->
+    <header class="bg-primary text-white shadow-md">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl md:text-2xl font-bold">
+                <i class="fa fa-heartbeat mr-2"></i>锻炼打卡
+            </h1>
+            <div class="text-sm opacity-90" id="current-date"></div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-6 max-w-2xl">
+        <!-- 打卡表单卡片 -->
+        <div class="bg-white rounded-xl p-5 mb-6 card-shadow">
+            <h2 class="text-lg font-semibold mb-4 pb-2 border-b border-gray-100">今日打卡</h2>
+            
+            <form id="checkin-form" class="space-y-4">
+                <!-- 打卡人 -->
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">打卡人</label>
+                    <input type="text" id="name" name="name" 
+                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                           placeholder="请输入你的名字" required>
+                </div>
+                
+                <!-- 今日目标 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">今日目标</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="button" class="goal-btn px-3 py-2 border border-gray-300 rounded-lg text-left hover:border-primary hover:bg-blue-50 transition-all" data-goal="跑步30分钟">
+                            <i class="fa fa-running mr-1"></i> 跑步30分钟
+                        </button>
+                        <button type="button" class="goal-btn px-3 py-2 border border-gray-300 rounded-lg text-left hover:border-primary hover:bg-blue-50 transition-all" data-goal="健身1小时">
+                            <i class="fa fa-dumbbell mr-1"></i> 健身1小时
+                        </button>
+                        <button type="button" class="goal-btn px-3 py-2 border border-gray-300 rounded-lg text-left hover:border-primary hover:bg-blue-50 transition-all" data-goal="瑜伽40分钟">
+                            <i class="fa fa-spa mr-1"></i> 瑜伽40分钟
+                        </button>
+                        <button type="button" class="goal-btn px-3 py-2 border border-gray-300 rounded-lg text-left hover:border-primary hover:bg-blue-50 transition-all" data-goal="步行1万步">
+                            <i class="fa fa-walking mr-1"></i> 步行1万步
+                        </button>
+                    </div>
+                    <input type="text" id="goal" name="goal" 
+                           class="w-full mt-2 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                           placeholder="或输入其他目标">
+                </div>
+                
+                <!-- 完成情况 -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">完成情况</label>
+                    <div class="flex flex-wrap gap-3">
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="status" value="已完成" class="w-4 h-4 text-primary focus:ring-primary" checked>
+                            <span class="ml-2 text-sm">已完成</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="status" value="部分完成" class="w-4 h-4 text-primary focus:ring-primary">
+                            <span class="ml-2 text-sm">部分完成</span>
+                        </label>
+                        <label class="inline-flex items-center">
+                            <input type="radio" name="status" value="未完成" class="w-4 h-4 text-primary focus:ring-primary">
+                            <span class="ml-2 text-sm">未完成</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- 备注 -->
+                <div>
+                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-1">备注 (可选)</label>
+                    <textarea id="notes" name="notes" rows="2"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                              placeholder="可以写下今天的感受或其他信息"></textarea>
+                </div>
+                
+                <!-- 提交按钮 -->
+                <button type="submit" class="w-full bg-secondary text-white py-3 px-4 rounded-lg font-medium btn-hover flex items-center justify-center">
+                    <i class="fa fa-check-circle mr-2"></i> 提交打卡
+                </button>
+            </form>
+        </div>
+        
+        <!-- 打卡记录列表 -->
+        <div class="bg-white rounded-xl p-5 card-shadow">
+            <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
+                <h2 class="text-lg font-semibold">今日打卡记录</h2>
+                <span class="text-sm bg-blue-100 text-primary px-2 py-1 rounded-full" id="checkin-count">0人已打卡</span>
+            </div>
+            
+            <div id="checkin-list" class="space-y-4">
+                <!-- 打卡记录将通过JavaScript动态添加 -->
+                <div class="text-center text-gray-500 py-8" id="empty-state">
+                    <i class="fa fa-calendar-o text-4xl mb-3 opacity-30"></i>
+                    <p>今天还没有人打卡哦，快来成为第一个吧！</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-gray-200 py-4 mt-6">
+        <div class="container mx-auto px-4 text-center text-sm text-gray-500">
+            <p>锻炼打卡小程序 &copy; <span id="current-year"></span></p>
+            <p class="mt-1">让运动成为习惯，让健康常伴左右</p>
+        </div>
+    </footer>
+
+    <!-- 成功提示框 -->
+    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-dark text-white px-6 py-3 rounded-lg shadow-lg opacity-0 transition-opacity duration-300 flex items-center">
+        <i class="fa fa-check-circle mr-2 text-secondary"></i>
+        <span id="toast-message">打卡成功！</span>
+    </div>
+
+    <script>
+        // 设置当前日期和年份
+        document.addEventListener('DOMContentLoaded', function() {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            document.getElementById('current-date').textContent = now.toLocaleDateString('zh-CN', options);
+            document.getElementById('current-year').textContent = now.getFullYear();
+            
+            // 加载保存的打卡记录
+            loadCheckins();
+            
+            // 目标按钮点击事件
+            const goalButtons = document.querySelectorAll('.goal-btn');
+            goalButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    document.getElementById('goal').value = this.getAttribute('data-goal');
+                    
+                    // 高亮选中的目标按钮
+                    goalButtons.forEach(btn => btn.classList.remove('border-primary', 'bg-blue-50'));
+                    this.classList.add('border-primary', 'bg-blue-50');
+                });
+            });
+            
+            // 表单提交事件
+            document.getElementById('checkin-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                submitCheckin();
+            });
+        });
+        
+        // 提交打卡
+        function submitCheckin() {
+            const name = document.getElementById('name').value.trim();
+            const goal = document.getElementById('goal').value.trim();
+            const status = document.querySelector('input[name="status"]:checked').value;
+            const notes = document.getElementById('notes').value.trim();
+            
+            if (!name) {
+                showToast('请输入打卡人姓名');
+                return;
+            }
+            
+            if (!goal) {
+                showToast('请选择或输入今日目标');
+                return;
+            }
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+            
+            const checkin = {
+                id: Date.now(),
+                name,
+                goal,
+                status,
+                notes,
+                time: timeString,
+                date: now.toISOString().split('T')[0] // 仅保留日期部分
+            };
+            
+            // 保存打卡记录
+            saveCheckin(checkin);
+            
+            // 重新加载打卡记录
+            loadCheckins();
+            
+            // 重置表单
+            document.getElementById('checkin-form').reset();
+            document.querySelectorAll('.goal-btn').forEach(btn => 
+                btn.classList.remove('border-primary', 'bg-blue-50')
+            );
+            
+            // 显示成功提示
+            showToast('打卡成功！');
+        }
+        
+        // 保存打卡记录到本地存储
+        function saveCheckin(checkin) {
+            let checkins = JSON.parse(localStorage.getItem('workoutCheckins') || '[]');
+            checkins.push(checkin);
+            localStorage.setItem('workoutCheckins', JSON.stringify(checkins));
+        }
+        
+        // 从本地存储加载打卡记录
+        function loadCheckins() {
+            const checkinList = document.getElementById('checkin-list');
+            const emptyState = document.getElementById('empty-state');
+            const checkinCount = document.getElementById('checkin-count');
+            
+            let checkins = JSON.parse(localStorage.getItem('workoutCheckins') || '[]');
+            const today = new Date().toISOString().split('T')[0];
+            
+            // 筛选出今天的打卡记录，并按时间倒序排列
+            const todayCheckins = checkins
+                .filter(checkin => checkin.date === today)
+                .sort((a, b) => b.id - a.id);
+            
+            // 更新打卡人数
+            checkinCount.textContent = `${todayCheckins.length}人已打卡`;
+            
+            // 清空列表
+            checkinList.innerHTML = '';
+            
+            // 如果没有打卡记录，显示空状态
+            if (todayCheckins.length === 0) {
+                checkinList.appendChild(emptyState);
+                return;
+            }
+            
+            // 添加打卡记录
+            todayCheckins.forEach(checkin => {
+                const statusClass = checkin.status === '已完成' ? 'bg-green-100 text-green-800' :
+                                   checkin.status === '部分完成' ? 'bg-yellow-100 text-yellow-800' :
+                                   'bg-red-100 text-red-800';
+                
+                const checkinEl = document.createElement('div');
+                checkinEl.className = 'p-3 border border-gray-100 rounded-lg hover:bg-gray-50 transition-all';
+                checkinEl.innerHTML = `
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h3 class="font-medium">${checkin.name}</h3>
+                            <p class="text-sm text-gray-600 mt-1">目标：${checkin.goal}</p>
+                            ${checkin.notes ? `<p class="text-sm text-gray-500 mt-1 italic">${checkin.notes}</p>` : ''}
+                        </div>
+                        <span class="text-xs px-2 py-1 rounded-full ${statusClass}">${checkin.status}</span>
+                    </div>
+                    <div class="text-xs text-gray-400 mt-2">${checkin.time}</div>
+                `;
+                
+                checkinList.appendChild(checkinEl);
+            });
+        }
+        
+        // 显示提示框
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toast-message');
+            
+            toastMessage.textContent = message;
+            toast.style.opacity = '1';
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
